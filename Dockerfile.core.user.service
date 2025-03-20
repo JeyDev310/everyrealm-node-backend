@@ -1,0 +1,76 @@
+ARG RUN_IMAGE=node:18-slim
+FROM --platform=linux/arm64 $RUN_IMAGE AS builder
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    make \
+    git \
+    build-essential \
+    gcc \
+    bash \
+    postgresql-client \
+    python3 \
+    python3-pip
+
+# Debugging step to verify dependencies installation
+RUN echo "Installed dependencies in builder stage:" && ls -la /usr/bin
+
+RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
+
+USER node
+
+WORKDIR /home/node/app
+
+# Debugging step to check working directory before copying files
+RUN echo "Current directory before copying package.json:" && pwd && ls -la /home/node/app
+
+# Install dependencies first, in a different location for easier app bind mounting for local development
+COPY --chown=node:node ./package*.json ./
+
+# Debugging step to check directory after copying package.json
+RUN echo "Directory after copying package.json:" && ls -la /home/node/app
+
+RUN npm install --verbose
+
+RUN chown -R node:node ./node_modules
+
+# Copy in our source code last, as it changes the most
+COPY . .
+
+# Debugging step to ensure all files are copied
+RUN echo "Directory after copying source code:" && ls -la /home/node/app
+
+RUN make build
+
+# Start production stage
+FROM --platform=linux/arm64 $RUN_IMAGE AS production
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    make \
+    python3 \
+    python3-pip
+
+# Debugging step to verify dependencies installation in production
+RUN echo "Installed dependencies in production stage:" && ls -la /usr/bin
+
+RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
+
+USER node
+
+WORKDIR /home/node/app
+
+# Debugging step to check working directory in production stage
+RUN echo "Current directory in production stage:" && pwd && ls -la /home/node/app
+
+COPY --from=builder /home/node/app/package*.json ./
+COPY --from=builder /home/node/app/node_modules ./node_modules/
+COPY --from=builder /home/node/app/dist ./dist
+COPY --from=builder /home/node/app/Makefile ./
+COPY --from=builder /home/node/app/.sequelizerc_prod ./
+
+RUN mv ./.sequelizerc_prod ./.sequelizerc
+
+CMD ["npm", "run", "start"]

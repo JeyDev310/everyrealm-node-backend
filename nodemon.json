@@ -1,0 +1,29 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    "!./node_modules/models",
+    "./node_modules/**/node_modules"
+  ],
+  "ignoreRoot": [
+    ".git",
+    "dist",
+    "public"
+  ],
+  "verbose": false,
+  "execMap": {
+    "js": "node --harmony"
+  },
+  "events": {
+    "restart": "echo App restarted"
+  },
+  "watch": [
+    "./src/",
+    ".env",
+    "./index.js",
+    "./node_modules/models"
+  ],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "ext": "js"
+}

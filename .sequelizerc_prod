@@ -1,0 +1,8 @@
+import { resolve } from 'path';
+
+module.exports = {
+  "config": resolve('dist', 'src/configs/databaseMigration.config.js'),
+  "models-path": resolve('dist', 'src/database/models'),
+  "migrations-path": resolve('dist', 'src/database/migrations'),
+  "seeders-path": resolve('dist', 'src/database/seeders'),
+};

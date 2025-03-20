@@ -1,0 +1,6 @@
+export { fileUploadSchema } from './fileUpload.schema'
+export { getCurrenciesSchema } from './getCurrencies.schema'
+export { getLanguagesSchema } from './getLanguages.schema'
+export { getPagesSchema } from './getPages.schema'
+export { getSettingsSchema } from './getSettings.schema'
+export { successSchema } from './success.schema'
